@@ -1,4 +1,5 @@
-#Optionen, dbname,user,password entsprechend eurer Datenbank ändern
+import psycopg2
+
 dbname="dbs"
 user="postgres"
 password="Benedikt"
@@ -7,7 +8,6 @@ path_to_file="C:\\Users\\caval\\downloads\\gdp.csv" #für windows \\ sonst /
 path_to_file2="C:\\Users\\caval\\downloads\\population_growth.csv"
 path_to_file3="C:\\Users\\caval\\downloads\\meat_consumption_worldwide.csv"
 path_to_file4="C:\\Users\\caval\\downloads\\co2_emission.csv"
-import psycopg2
 # Connect to an existing database
 conn = psycopg2.connect(dbname=dbname, user=user, password=password)
 # Open a cursor to perform database operations
@@ -29,12 +29,41 @@ f = open(path_to_file)
 f.readline()
 #copy from
 #for more information on the python function:
-#https://www.psycopg.org/docs/cursor.html#cursor.copy_expert
-#postgre statement:
-#https://www.postgresql.org/docs/current/static/sql-copy.html
+import psycopg2
+
+# Python Programm von Luis Schulze, Benedikt Schmitz und Tobias Moretti für die Formatierung jeglicher Datensätze.
+
+dbname="dbs"
+user="postgres"
+password="Benedikt"
+path_to_file="C:\\Users\\caval\\downloads\\gdp.csv"
+path_to_file2="C:\\Users\\caval\\downloads\\population_growth.csv"
+path_to_file3="C:\\Users\\caval\\downloads\\meat_consumption_worldwide.csv"
+path_to_file4="C:\\Users\\caval\\downloads\\co2_emission.csv"
+
+# Connect to an existing database
+conn = psycopg2.connect(dbname=dbname, user=user, password=password)
+# Open a cursor to perform database operations
+cur = conn.cursor()
+
+#gdp
+
+#drop
+cur.execute("DROP TABLE gdp; DROP TABLE gdp_3cols; DROP TABLE beef; DROP TABLE sheep; DROP TABLE poultry; DROP TABLE pig; DROP TABLE co2_meat;")
+#str: list attr types
+x = ""
+for i in range (1960,2021): x += ", _"+str(i)+" double precision"
+print("x= "+x)
+#CREATE TABLE
+cur.execute("CREATE TABLE gdp ( Country_Name text, Country_Code text, \
+Indicator_Name text, Indicator_Code text"+x+", error text);")
+#file
+f = open(path_to_file)
+f.readline()
+#copy from
 cur.copy_expert("COPY gdp FROM STDIN \
 WITH (FORMAT csv)", f)
-#SELECT * 
+#SELECT *
 cur.execute("SELECT * FROM gdp;")
 print("\t gdp ="+str(cur.fetchmany(3)))
 #CREATE TABLE gdp_3cols
@@ -53,7 +82,6 @@ print("\t gdp_3cols="+str(cur.fetchmany(20)))
 
 #drop
 cur.execute("DROP TABLE pop_growth; DROP TABLE pop_growth_4cols;")
-#str: list attr types
 x = ""
 for i in range (1960,2021): x += ", _"+str(i)+" double precision"
 print("x= "+x)
@@ -64,10 +92,6 @@ Indicator_Name text, Indicator_Code text"+x+");")
 f2 = open(path_to_file2)
 f2.readline()
 #copy from
-#for more information on the python function:
-#https://www.psycopg.org/docs/cursor.html#cursor.copy_expert
-#postgre statement:
-#https://www.postgresql.org/docs/current/static/sql-copy.html
 cur.copy_expert("COPY pop_growth FROM STDIN \
 WITH (FORMAT csv)", f2)
 #SELECT *
@@ -89,7 +113,6 @@ print("\t pop_growth_4cols="+str(cur.fetchmany(20)))
 
 #drop
 cur.execute("DROP TABLE meat_consumption; DROP TABLE meat_consumption_4cols;")
-#str: list attr types
 
 #CREATE TABLE
 cur.execute("CREATE TABLE meat_consumption (Country_Code text, Subject text,\
@@ -98,10 +121,6 @@ Measure text, Year integer, Value double precision);")
 f3 = open(path_to_file3)
 f3.readline()
 #copy from
-#for more information on the python function:
-#https://www.psycopg.org/docs/cursor.html#cursor.copy_expert
-#postgre statement:
-#https://www.postgresql.org/docs/current/static/sql-copy.html
 cur.copy_expert("COPY meat_consumption FROM STDIN \
 WITH (FORMAT csv)", f3)
 #SELECT *
@@ -132,14 +151,10 @@ Year integer, Value double precision);")
 f4 = open(path_to_file4)
 f4.readline()
 #copy from
-#for more information on the python function:
-#https://www.psycopg.org/docs/cursor.html#cursor.copy_expert
-#postgre statement:
-#https://www.postgresql.org/docs/current/static/sql-copy.html
 cur.copy_expert("COPY co2_emissions FROM STDIN \
 WITH (FORMAT csv)", f4)
 
-#line chart Query
+#creating one table for every sort of meat
 
 cur.execute("CREATE TABLE co2_meat (Year integer, Country_Code text,\
 Beef double precision, Sheep double precision, Poultry double precision, Pig double precision, co2 double precision);")
@@ -168,6 +183,9 @@ Pig double precision);")
 cur.execute("INSERT INTO pig (Year, Country_Code, PIG) \
 SELECT Year, Country_Code, Value FROM meat_consumption_4cols WHERE Subject = 'PIG';")
 
+#using those tables to create a table where all the values for the different sorts of meat are in one line,
+#better for the visualization using google charts
+
 cur.execute("INSERT INTO co2_meat (Year, Country_Code, Beef, Sheep, Poultry, Pig, co2) \
 SELECT B.Year, B.Country_Code, B.BEEF, S.SHEEP, Po.POULTRY, Pi.PIG, C.Value         \
 FROM beef B LEFT JOIN sheep S ON (B.Country_Code = S.Country_Code AND B.Year = S.Year) LEFT JOIN poultry Po ON \
@@ -180,7 +198,7 @@ OR B.Country_Code = 'JPN' OR B.Country_Code = 'TUR') AND (B.Year < 2018) ORDER B
 
 cur.execute("SELECT * FROM co2_meat")
 
-print("\t Gejoined="+str(cur.fetchall()))
+print("\t co2_meat="+str(cur.fetchall()))
 
 
 
