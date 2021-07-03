@@ -3,7 +3,7 @@ import psycopg2
 dbname="dbs"
 user="postgres"
 password="Benedikt"
-path_to_file="C:\\Users\\caval\\downloads\\gdp.csv" 
+path_to_file="C:\\Users\\caval\\downloads\\gdp.csv"
 path_to_file2="C:\\Users\\caval\\downloads\\population_growth.csv"
 path_to_file3="C:\\Users\\caval\\downloads\\meat_consumption_worldwide.csv"
 path_to_file4="C:\\Users\\caval\\downloads\\co2_emission.csv"
