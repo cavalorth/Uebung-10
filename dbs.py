@@ -26,39 +26,7 @@ Indicator_Name text, Indicator_Code text"+x+", error text);")
 #file
 f = open(path_to_file)
 f.readline()
-#copy from
-#for more information on the python function:
-import psycopg2
 
-# Python Programm von Luis Schulze, Benedikt Schmitz und Tobias Moretti für die Formatierung jeglicher Datensätze.
-
-dbname="dbs"
-user="postgres"
-password="Benedikt"
-path_to_file="C:\\Users\\caval\\downloads\\gdp.csv"
-path_to_file2="C:\\Users\\caval\\downloads\\population_growth.csv"
-path_to_file3="C:\\Users\\caval\\downloads\\meat_consumption_worldwide.csv"
-path_to_file4="C:\\Users\\caval\\downloads\\co2_emission.csv"
-
-# Connect to an existing database
-conn = psycopg2.connect(dbname=dbname, user=user, password=password)
-# Open a cursor to perform database operations
-cur = conn.cursor()
-
-#gdp
-
-#drop
-cur.execute("DROP TABLE gdp; DROP TABLE gdp_3cols; DROP TABLE beef; DROP TABLE sheep; DROP TABLE poultry; DROP TABLE pig; DROP TABLE co2_meat;")
-#str: list attr types
-x = ""
-for i in range (1960,2021): x += ", _"+str(i)+" double precision"
-print("x= "+x)
-#CREATE TABLE
-cur.execute("CREATE TABLE gdp ( Country_Name text, Country_Code text, \
-Indicator_Name text, Indicator_Code text"+x+", error text);")
-#file
-f = open(path_to_file)
-f.readline()
 #copy from
 cur.copy_expert("COPY gdp FROM STDIN \
 WITH (FORMAT csv)", f)
